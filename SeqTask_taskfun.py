@@ -66,7 +66,8 @@ def rnn_IO_gaussian(simparams):
 
 def rnn_IO_gaussian_continuous(simparams):
     # Time for one cue even to happen
-    simparams.update({"CueTime": (simparams["cueOn"] + simparams["cueOff"] + simparams["PostCue"])})
+    PostCue_time = np.random.randint(simparams["PostCue"][0], simparams["PostCue"][1])
+    simparams.update({"CueTime": (simparams["cueOn"] + simparams["cueOff"] + PostCue_time)})
     # Total time for input and output signal
     trialTime = simparams['CueTime']*simparams["MemorySpan"] + simparams['CueTime']*2*simparams["numTargetTrial"] + simparams["numTargetTrial"]*(simparams["forceWidth"] + simparams['postPress'])+simparams["preTime"]
     simparams.update({"trialTime": trialTime})
@@ -94,7 +95,7 @@ def rnn_IO_gaussian_continuous(simparams):
                 # Save the cues in history [instruction start time,instruction end time]
                 inputs_history[trial, target, 1:3] = [t, t + simparams["cueOn"]]
                 in_data[t_inp, trial, seq_data[trial, target]] = 1
-                t = t + simparams["cueOn"] + simparams["cueOff"] + simparams["PostCue"]
+                t = t + simparams["cueOn"] + simparams["cueOff"] + PostCue_time
 
             else:
                 # turn on a go cue
@@ -103,7 +104,7 @@ def rnn_IO_gaussian_continuous(simparams):
                 inputs_history[trial, target-simparams["MemorySpan"], 3:5] = [t, t + simparams["cueOn"]]
                 in_data[t_inp, trial, simparams["numTargets"]] = 1
                 t_t = t + simparams["cueOn"] + simparams["cueOff"] + simparams["RT"]
-                t = t + simparams["cueOn"] + simparams["cueOff"] + simparams["PostCue"] + simparams["forceWidth"] + simparams['postPress']
+                t = t + simparams["cueOn"] + simparams["cueOff"] + PostCue_time + simparams["forceWidth"] + simparams['postPress']
 
                 # Produce an output
                 y = gaussian()
@@ -122,7 +123,7 @@ def rnn_IO_gaussian_continuous(simparams):
                     inputs_history[trial, target, 1:3] = [t, t + simparams["cueOn"]]
                 else:
                     in_data[t_inp, trial, seq_data[trial, target]] = 0
-                t = t + simparams["cueOn"] + simparams["cueOff"] + simparams["PostCue"]
+                t = t + simparams["cueOn"] + simparams["cueOff"] + PostCue_time
 
     inputs = torch.from_numpy(in_data)
     target_outputs = torch.from_numpy(out_data)
